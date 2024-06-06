@@ -2,7 +2,8 @@
 
 void mostrarMenu()
 {
-  printf("Hello World\n");
+  printf("Ingresa tu opción:\n");
+  printf("1. Pelear");
 }
 
 
