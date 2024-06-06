@@ -1,6 +1,12 @@
 #include <stdio.h>
 
-int main(void) {
+void mostrarMenu()
+{
   printf("Hello World\n");
-  return 0;
+}
+
+
+int main(void) {
+  mostrarMenu();
+  
 }
