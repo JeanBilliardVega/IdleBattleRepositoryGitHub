@@ -1,7 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
+
+void limpiarPantalla()
+{
+  #ifdef _WIN32
+    system("cls");
+  #else
+    system("clear");
+  #endif
+}
 
 void mostrarMenu()
 {
+  limpiarPantalla();
   puts("Ingresa tu opción:");
   puts("1. Pelear");
   puts("2. Summon");
@@ -16,7 +27,7 @@ int main(void) {
   {
     mostrarMenu();
     scanf(" %c", &opcion);
-    fflush(stdin);
+    getchar();
     switch(opcion)
     {
       case '1':
@@ -32,6 +43,8 @@ int main(void) {
         printf("eliminando cuenta\n");
         break;
     }
+    printf("Presiona enter para continuar...");
+    getchar();
   }while(opcion != '4');
   return 0;
 }
