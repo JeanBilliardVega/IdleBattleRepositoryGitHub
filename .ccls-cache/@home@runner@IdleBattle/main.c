@@ -2,7 +2,7 @@
 
 void mostrarMenu()
 {
-  puts("Ingresa tu opción:\n");
+  puts("Ingresa tu opción:");
   puts("1. Pelear");
   puts("2. Summon");
   puts("3. Personajes");
@@ -15,22 +15,23 @@ int main(void) {
   do
   {
     mostrarMenu();
-    scanf("%c", &opcion);
+    scanf(" %c", &opcion);
+    fflush(stdin);
     switch(opcion)
     {
       case '1':
-        printf("peleando");
+        printf("peleando\n");
         break;
       case '2':
-        printf("summoneando");
+        printf("summoneando\n");
         break;
       case '3':
-        printf("personajes");
+        printf("personajes\n");
         break;
       case '4':
-        printf("eliminando cuenta");
+        printf("eliminando cuenta\n");
         break;
     }
-  }while(opcion != 4);
-  
+  }while(opcion != '4');
+  return 0;
 }
