@@ -1,6 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct{
+  char nombre[50];
+  int atq; //Ataque
+  int pde; //Puntos De Esquiva
+  int hp; //Puntos De Vida
+  int tipo; //(1: fuego, 2: agua, 3: planta)
+}Personajes;
+
 void limpiarPantalla()
 {
   #ifdef _WIN32
