@@ -77,15 +77,20 @@ void pushFront(List * list, void * data)
     new->next = list->head;
     if(list->head) list->head->prev = new;
     list->head = new;
-
+    if(list->head->prev == NULL && list->head->next == NULL)
+      list->tail = list->head;
     list->tail = list->head;
     while(list->tail->next != NULL) list->tail = list->tail->next;
 }
 
 void pushBack(List * list, void * data) 
 {
-    list->current = list->tail;
-    pushCurrent(list,data);
+    if(firstList(list) == NULL) pushFront(list, data);
+    else
+    {
+      list->current = list->tail;
+      pushCurrent(list,data);
+    }
 }
 
 void pushCurrent(List * list, void * data) 
@@ -144,7 +149,7 @@ void list_sortedInsert(List *L, void *data,
 
   // Caso especial: inserción al principio o en lista vacía
   if (L->head == NULL || lower_than(data, L->head->data)) {
-        pushFront(L, data);
+    pushFront(L, data);
     return;
   }
 
@@ -158,7 +163,7 @@ void list_sortedInsert(List *L, void *data,
   L->current = current;
 
   // Insertar el nodo en la posición actual
-      pushCurrent(L, data);
+  pushCurrent(L, data);
 }
 
 void cleanList(List * list) 

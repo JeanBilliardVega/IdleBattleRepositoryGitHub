@@ -25,8 +25,7 @@ void * popBack(List * list);
 
 void * popCurrent(List * list);
 
-void list_sortedInsert(List *L, void *data,
- int (*lower_than)(void *data1, void *data2));
+void list_sortedInsert(List *L, void *data, int (*lower_than)(void *data1, void *data2));
 
 void cleanList(List * list);
 
