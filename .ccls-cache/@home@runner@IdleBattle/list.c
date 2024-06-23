@@ -71,6 +71,18 @@ void * prevList(List * list)
     return NULL;
 }
 
+void * anteriorList(List *list)
+{
+  if(list->current != NULL)
+  {
+    if(list->current->prev != NULL)
+    {
+      return list->current->prev->data;
+    }
+  }
+  return NULL;
+}
+
 void pushFront(List * list, void * data) 
 { 
     Node* new = createNode(data);
@@ -172,4 +184,15 @@ void cleanList(List * list)
     {
         popFront(list);
     }
+}
+
+int isIn(List * list, void * data)
+{
+  Node* actual = list->head;
+  while(actual != NULL)
+  {
+    if(actual->data == data) return 1;
+    actual = actual->next;
+  }
+  return 0;
 }

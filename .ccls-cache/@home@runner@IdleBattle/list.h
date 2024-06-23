@@ -19,6 +19,8 @@ void pushBack(List * list, void * data);
 
 void pushCurrent(List * list, void * data);
 
+void * anteriorList(List *list);
+
 void * popFront(List * list);
 
 void * popBack(List * list);
@@ -28,5 +30,7 @@ void * popCurrent(List * list);
 void list_sortedInsert(List *L, void *data, int (*lower_than)(void *data1, void *data2));
 
 void cleanList(List * list);
+
+int isIn(List * list, void * data);
 
 #endif /* List_h */

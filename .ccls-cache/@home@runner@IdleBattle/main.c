@@ -2,9 +2,53 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
+#include <termios.h>
+#include <time.h>
+#include <ctype.h>
 #include "list.h"
 #include "hashMap.h"
-#include <time.h>
+
+//======================Configuración del terminal========================
+
+struct termios original;
+
+void save_original_terminal_mode() 
+{
+    tcgetattr(STDIN_FILENO, &original);
+}
+
+void restore_original_terminal_mode() 
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, &original);
+}
+
+void set_conio_terminal_mode() {
+    struct termios newTermios;
+    tcgetattr(STDIN_FILENO, &newTermios);
+    newTermios.c_lflag &= ~ICANON; 
+    newTermios.c_lflag &= ~ECHO;   
+    tcsetattr(STDIN_FILENO, TCSANOW, &newTermios);
+}
+
+void hide_cursor() 
+{
+  printf("\033[?25l");
+  fflush(stdout);
+}
+void show_cursor() 
+{
+  printf("\033[?25h");
+  fflush(stdout);
+}
+
+//========================================================================
+
+
+
+
+
+
 
 //Jean Billiard  06/06/24
 //=========================Bloque de estructura===========================
@@ -361,50 +405,184 @@ int gachacomun()
   return (rand()%13) + 1;
 }
 
-
-
 int tirarBanner(account* yo, HashMap*  banners)
 {
   int prob = rand()%999;
-  printf("Probabilidad: %i\n", prob);
   if(prob == 0) return 15;
   else return gachacomun();
 }
 
-
-//========================================================================
-
-//==========================Funciones de menu=============================
-void menuCombate(account* yo, List* enemies)
+void mostrarNivel(enemyState* level)
 {
-  printf("Combate");
-  return;
+  char estado[65];
+  if (level->defeat == false) strcpy(estado, "   (No derrotado)");
+  else strcpy(estado, "   (Derrotado)");
+  
+  
+  printf("-----------------------------------\n");
+  printf("| %-*s|\n", 32, level->enemy.nombre);
+  printf("-----------------------------------\n");
+  printf("| PV       | %-*i|\n", 21, level->enemy.hp);
+  printf("| ATQ      | %-*i|\n", 21, level->enemy.atq);
+  printf("-----------------------------------\n");
+}
+
+void selectEnemy(int nivel, enemyState* level)
+{
+  if(nivel == 1) printf("%35s", "Siguiente(D)");
+  else if(nivel == 15) printf("Anteriores(A)");
+  else printf("Anteriores(A)          Siguiente(D)");
+  printf("\n");
+}
+
+void mostrarListaPersonajes(List* charac) //Jean Billiard  08/06/24
+{
+  puts("Personajes                 Salir(0)");
+  puts("-----------------------------------");
+  int numero = 0;
+  for (campeon* current = firstList(charac); current != NULL; current = nextList(charac))
+  {
+    numero++;
+    printf("| %d )", numero);
+    printf(" %-*s|\n",28,current->nombre);
+    printf("-----------------------------------\n");
+  }
+  if(numero == 0)
+  {
+    printf("| No tienes personajes            |\n");
+    printf("-----------------------------------\n");
+  }
 }
 
 void mostrarInfoProbalidades()                //Jose 09/06/24
 {
-  printf("Infomacion de la probabilidad para sacar un personaje por rareza\n\n");
-  printf("Rareza común : 7,07%%\n");
-  printf("Rareza legendaria : 1%%\n");
+  printf("**Detalles**\n");
+  printf("Este gachapón contiene 14 campeones comunes y 1 campeón legendario.\n");
+  printf("Las probalidades se desmuestra en la siguiente tabla:\n");
+  printf("-----------------------------------\n");
+  printf("|    Rareza     |   Probabilidad  |\n");
+  printf("-----------------------------------\n");
+  printf("|     Común     |      7.14 %%     |\n");
+  printf("|   Legendario  |      0.10 %%     |\n");
+  printf("-----------------------------------\n");
   printf("\n");
+}
+
+void mostrarPersonaje(int opcion, List* charac)
+{
+  campeon* current = firstList(charac);
+  int avance = 1;
+  while(avance < opcion && current != NULL)
+  {
+    current = nextList(charac);
+    avance++;
+  }
+  if(current != NULL)
+  {
+    printf("-----------------------------------\n");
+    printf("| %-*s|\n", 32,current->nombre);
+    printf("-----------------------------------\n");
+
+    printf("| Tipo     |");
+    if(current->tipo == 1)
+    {
+      printf(" %-*s|\n", 21, "Fuego");
+    }
+    else if(current->tipo == 2)
+    {
+      printf(" %-*s|\n", 21, "Agua");
+    }
+    else if(current->tipo == 3)
+    {
+      printf(" %-*s|\n", 21, "Planta");
+    }
+    printf("| PV       | %-*i|\n", 21,current->hp);
+    printf("| ATQ      | %-*i|\n", 21,current->atq);
+    printf("| PDE      | %-*i|\n", 21,current->pde);
+    printf("-----------------------------------\n");
+    getchar();
+    presioneParaContinuar();
+  }
+}
+
+void prepararCombate(account* yo, enemyState *level)
+{
+  presioneParaContinuar();
+}
+
+//========================================================================
+
+//==========================Funciones de menu=============================
+
+
+void menuCombate(account* yo, List* enemies)
+{
+  limpiarPantalla();
+  int nivel = 1;
+  char opcion;
+  enemyState *nivelActual = firstList(enemies);
+  while(true)
+  {
+    printf("%*sNivel %i\n", 15, "", nivel);
+    selectEnemy(nivel, nivelActual);
+    mostrarNivel(nivelActual);
+    printf("Salir(0)             Seleccionar(X)\n");
+    scanf(" %c", &opcion);
+    limpiarPantalla();
+    if(opcion == '0') return;
+    switch(opcion)
+    {
+      case 'D':
+      case 'd':
+        
+        if(nivel <= 14)
+        {
+          if(nivelActual->defeat)
+          {
+            nivel++;
+            nivelActual = nextList(enemies);
+          }
+          else
+          {
+            printf("Aún no has derrotado a %s\n", nivelActual->enemy.nombre);
+          }
+        }
+        break;
+      case 'A':
+      case 'a':
+        
+        if(nivel >= 2)
+        {
+          nivel--;
+          nivelActual = prevList(enemies);
+        }
+        break;
+      case 'X':
+      case 'x':
+        prepararCombate(yo, nivelActual);
+        limpiarPantalla();
+        break;
+    }
+  }
 }
 
 void menuSummon(account* yo, HashMap* banners)
 {
+  limpiarPantalla();
   int num;
-  int opcion;
+  char opcion;
   while (1)
     {
-      printf("%d\n\n", yo->deseos);
-      printf("Menú Summon\n");
-      printf("1) Tirar Banner\n");
-      printf("2) Mostrar Información del banner\n");
-      printf("3) Volver al Menú principal\n");
-      scanf("%i",&opcion);
+      limpiarPantalla();
+      printf("Deseos: %d                  Salir(0)\n", yo->deseos);
+      printf("-----------------------------------\n");
+      printf("|              Summon             |\n");
+      printf("-----------------------------------\n");
+      printf("Detalles(2)              Invocar(1)\n");
+      scanf("%c",&opcion);
       switch(opcion)
         {
-          
-          case 1:
+          case '1':
             limpiarPantalla();
             if(yo->deseos > 0)
             {
@@ -412,116 +590,71 @@ void menuSummon(account* yo, HashMap* banners)
               num = tirarBanner(yo, banners);
               campeon *obtenido = searchMap(banners, &num)->value;
               printf("Obtuviste: %s\n", obtenido->nombre);
-              pushBack(yo->charac, obtenido);
+              if(!isIn(yo->charac, obtenido))
+              {
+                pushBack(yo->charac, obtenido);
+              }
+              else
+              {
+                printf("Ya tienes este personaje\n");
+              }
             }
             else printf("No tienes deseos suficientes\n");
+            presioneParaContinuar();
             break;
 
-          case 2:
+          case '2':
             limpiarPantalla();
             mostrarInfoProbalidades();
+            presioneParaContinuar();
             break;
-
-          case 3:
-            limpiarPantalla();
-            printf("Volviendo al menu principal\n");
+          case '0':
             return;
-
-          default:
-            limpiarPantalla();
-            printf("Opcion invalida vuelva a elegir otra opción del 1 al 3\n");
-            break;
-
         }
     }
-}
-
-void mostrarListaPersonajes(List* charac) //Jean Billiard  08/06/24
-{
-  puts("Personajes:");
-  for (campeon* current = firstList(charac); current != NULL; current = nextList(charac))
-  {
-    printf("%s\n", current->nombre);
-  }
-}
-
-void mostrarPersonaje(int opcion, List* charac)
-{
-  campeon* current = firstList(charac);
-  int avance = 1;
-  while(avance < opcion)
-  {
-    current = nextList(charac);
-    avance += 1;
-  }
-  printf("Nombre: %s\n", current->nombre);
-  printf("Tipo: ");
-  if(current->tipo == 1)
-  {
-    printf("Fuego\n");
-  }
-  else if(current->tipo == 2)
-  {
-    printf("Agua\n");
-  }
-  else if(current->tipo == 3)
-  {
-    printf("Planta\n");
-  }
-  printf("Puntos de Vida: %i\n", current->hp);
-  printf("Ataque: %i\n", current->atq);
-  printf("Puntos de Esquiva: %i\n", current->pde);
-  presioneParaContinuar();
 }
 
 void menuPersonajes(account* yo)
 {
-  //printf("Personajes");
-  campeon* hi;
+  restore_original_terminal_mode();
   int opcion;
-  do
+  while(true)
   {
+    limpiarPantalla();
     mostrarListaPersonajes(yo->charac);
-    puts("Elige el número de personaje para ver sus estadísticas");
-    puts("o presiona 0 para volver al menú principal");
-    scanf(" %i", &opcion);
-    if(opcion != 0)
+    printf("Ingrese su opción(Enter para confirmar): ");
+    if(scanf("%i", &opcion) != 1 || opcion < 0 || opcion > 15)
     {
-      limpiarPantalla();
-      hi = firstList(yo->charac);
-      while(hi != NULL)
-        {
-          printf("Nombre: %s\n", hi->nombre);
-          nextList(yo->charac);
-        }
-      mostrarPersonaje(opcion, yo->charac);
+      while(getchar() != '\n');
+      printf("Opción inválida\n");
     }
-  }while(opcion != 0);
+    if(opcion == 0) return;
+
+    limpiarPantalla();
+    mostrarPersonaje(opcion, yo->charac);
+  }
 }
 
 bool menuEliminar()  //Jose Mena  09/06/24
 {
+  limpiarPantalla();
   char opcion;
   bool notEliminar = false;
   while (!notEliminar)
     {
       printf("¿Estas seguro de querer eliminar la cuenta?\n");
-      puts("1) Si marcas es opción eliminaras tu cuenta , perdiendo todo el progreso de esta\n");
-      puts("2) Si marcas esta opción volverás al menú inicio sin eliminar la cuenta\n");
+      printf("          Si(S)         No(otras teclas)\n");
       scanf(" %c",&opcion);
 
       switch (opcion)
         {
-          case '1':
+          case 'S':
+          case 's':
             printf("Eliminando cuenta y cerrando el juego\n");
             return true;
-
-          case '2':
-            notEliminar = true;
             break;
-
           default:
-            printf("Opción no valida ingrese 1 si quiere eliminar o 2 para conservar\n");
+            return false;
         }
     }
   return false;
@@ -542,14 +675,19 @@ void mostrarMenu()
 
 
 int main(void) {
+  
+  save_original_terminal_mode();
   srand(time(NULL));
+  set_conio_terminal_mode();
+  hide_cursor();
+  
   bool eliminar = false;
   HashMap* banners = createMap(22);
   List* enemies = createList();
   account* yo = (account*)malloc(sizeof(account));
   inicializeBanners(banners);
   inicializeEnemies(enemies);
-    
+    /*
   while(true)
     {
       int input;
@@ -559,7 +697,7 @@ int main(void) {
       campeon *obtenido = searchMap(banners, &num)->value;
       printf("Obtuviste: %s\n", obtenido->nombre);
     }
-
+*/
   
   /*
   int i = 1;
@@ -595,24 +733,28 @@ int main(void) {
   {
     mostrarMenu();
     opcion = getchar();
-    getchar();
     switch(opcion)
     {
       case '1':
         menuCombate(yo, enemies);
+        
         break;
       case '2':
         menuSummon(yo, banners);
         break;
       case '3':
+        show_cursor();
         menuPersonajes(yo);
+        set_conio_terminal_mode();
+        hide_cursor();
         break;
       case '4':
         eliminar = menuEliminar();
         break;
     }
+    //while(getchar() != '\n');
     limpiarPantalla();
-    presioneParaContinuar();
+    //presioneParaContinuar();
   }while(!eliminar);
   return 0;
 }
