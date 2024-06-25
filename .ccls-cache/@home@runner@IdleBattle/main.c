@@ -269,10 +269,10 @@ void inicializeEnemies(List* enemies)      //inicializar los enemigos
   enemyState* sdv = (enemyState*)malloc(sizeof(enemyState));
   sdv->defeat = false;
   sdv->type = 1;
-  strcpy(sdv->enemy.nombre, "Saqueador del vacío");
-  sdv->enemy.hp = 5;
-  sdv->enemy.atq = 10;
-  sdv->enemy.tipo = 2;
+  strcpy(sdv->enemy.nombre, "Saqueador del vacio");
+  sdv->enemy.hp = 23;
+  sdv->enemy.atq = 15;
+  sdv->enemy.tipo = 1;
 
   enemyState* creeper = (enemyState*)malloc(sizeof(enemyState));
   creeper->defeat = false;
@@ -286,9 +286,9 @@ void inicializeEnemies(List* enemies)      //inicializar los enemigos
   teemo->defeat = false;
   teemo->type = 2;
   strcpy(teemo->enemy.nombre, "Teemo");
-  teemo->enemy.hp = 5;
+  teemo->enemy.hp = 25;
   teemo->enemy.atq = 10;
-  teemo->enemy.tipo = 2;
+  teemo->enemy.tipo = 3;
 
   enemyState* saibaMan = (enemyState*)malloc(sizeof(enemyState));
   saibaMan->defeat = false;
@@ -317,7 +317,7 @@ void inicializeEnemies(List* enemies)      //inicializar los enemigos
   enemyState* barbaro = (enemyState*)malloc(sizeof(enemyState));
   barbaro->defeat = false;
   barbaro->type = 1;
-  strcpy(barbaro->enemy.nombre, "Bárbaro");
+  strcpy(barbaro->enemy.nombre, "Barbaro");
   barbaro->enemy.hp = 20;
   barbaro->enemy.atq = 20;
   barbaro->enemy.tipo = 3;
@@ -400,28 +400,42 @@ void inicializeYo(account* yo)     //inicializar el jugador
 //========================================================================
 
 //============================Herramientas================================
-int gachacomun()
+int gachaComun()
 {
-  return (rand()%13) + 1;
+  return rand()%14 + 1;
 }
 
-int tirarBanner(account* yo, HashMap*  banners)
+int invocar()
 {
   int prob = rand()%999;
   if(prob == 0) return 15;
-  else return gachacomun();
+  else return gachaComun();
 }
 
 void mostrarNivel(enemyState* level)
 {
+  /*
   char estado[65];
   if (level->defeat == false) strcpy(estado, "   (No derrotado)");
   else strcpy(estado, "   (Derrotado)");
-  
+  */
   
   printf("-----------------------------------\n");
   printf("| %-*s|\n", 32, level->enemy.nombre);
   printf("-----------------------------------\n");
+  printf("| Tipo     |");
+  if(level->enemy.tipo == 1)
+  {
+    printf(" %-*s|\n", 21, "Fuego");
+  }
+  else if(level->enemy.tipo == 2)
+  {
+    printf(" %-*s|\n", 21, "Agua");
+  }
+  else if(level->enemy.tipo == 3)
+  {
+    printf(" %-*s|\n", 21, "Planta");
+  }
   printf("| PV       | %-*i|\n", 21, level->enemy.hp);
   printf("| ATQ      | %-*i|\n", 21, level->enemy.atq);
   printf("-----------------------------------\n");
@@ -505,9 +519,326 @@ void mostrarPersonaje(int opcion, List* charac)
   }
 }
 
-void prepararCombate(account* yo, enemyState *level)
+int unit(int data)
 {
-  presioneParaContinuar();
+  if(data == 0) return 1;
+  int count = 0;
+  while(data != 0)
+    {
+      data /= 10;
+      count++;
+    }
+  return count;
+}
+
+void info(campeon you, enemyState ene)
+{
+  int longitud = strlen(ene.enemy.nombre);
+  printf(" ______________________________________   Abandonar(0)\n");
+  printf("| %-*s%s |\n", 36 - longitud, "",ene.enemy.nombre);
+  printf("| %-*sPV %d |\n", 33 - unit(ene.enemy.hp), "", ene.enemy.hp);
+  printf("| %-*sATQ %d |\n", 32 - unit(ene.enemy.atq), "", ene.enemy.atq);
+  printf("|                                      |  ATACAR(A)");
+  printf("\n|-----------------VS-------------------|\n");
+  printf("|                                      |  Esquivar(E)\n");
+  printf("| %-*s|\n", 37, you.nombre);
+  printf("| PV %-*d|\n", 34,you.hp);
+  printf("| ATQ %-*d|\n", 33, you.atq);
+  printf("| PDE %-*d|\n", 33, you.pde);
+  printf(" ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\n");
+}
+
+int atack(campeon you, enemyState ene, int i)
+{
+  switch(i)
+  {
+    case 1:
+      if(you.tipo == 1)
+      {
+        if(ene.enemy.tipo == 1) return you.atq;
+        else if(ene.enemy.tipo == 2) return you.atq / 2;
+        else if(ene.enemy.tipo == 3) return you.atq * 2;
+      }
+      else if(you.tipo == 2)
+      {
+        if(ene.enemy.tipo == 1) return you.atq * 2;
+        else if(ene.enemy.tipo == 2) return you.atq;
+        else if(ene.enemy.tipo == 3) return you.atq / 2;
+      }
+      else if(you.tipo == 3)
+      {
+        if(ene.enemy.tipo == 1) return you.atq / 2;
+        else if(ene.enemy.tipo == 2) return you.atq * 2;
+        else if(ene.enemy.tipo == 3) return you.atq;
+      }
+      break;
+    case 2:
+      if(ene.enemy.tipo == 1)
+      {
+        if(you.tipo == 1) return ene.enemy.atq;
+        else if(you.tipo == 2) return ene.enemy.atq / 2;
+        else if(you.tipo == 3) return ene.enemy.atq * 2;
+      }
+      else if(ene.enemy.tipo == 2)
+      {
+        if(you.tipo == 1) return ene.enemy.atq * 2;
+        else if(you.tipo == 2) return ene.enemy.atq;
+        else if(you.tipo == 3) return ene.enemy.atq / 2;
+      }
+      else if(ene.enemy.tipo == 3)
+      {
+        if(you.tipo == 1) return ene.enemy.atq / 2;
+        else if(you.tipo == 2) return ene.enemy.atq * 2;
+        else if(you.tipo == 3) return ene.enemy.atq;
+      }
+      break;
+  }
+  return 0;
+}
+
+void batalla(campeon* you, enemyState* ene, int *deseos, int nivel)
+{
+  limpiarPantalla();
+  bool fernanMode = false;
+  bool teemode = false;
+  bool slimeMode = false;
+  char actionJugador;
+  int enemyMove;
+  int dmg;
+  if(strcmp(ene->enemy.nombre, "Slime") == 0) slimeMode = true;
+  if(strcmp(ene->enemy.nombre, "Teemo") == 0) teemode = true;
+  if(strcmp(you->nombre, "Fernanfloo") == 0) fernanMode = true;
+  campeon tempYou = *you;
+  enemyState tempEne = *ene;
+  int turno = 1;
+  while(true)
+    {
+      srand(time(NULL));
+      printf("%15sTurno: %d\n", "",turno);
+      info(tempYou, tempEne);
+      actionJugador = getchar();
+      limpiarPantalla();
+      if(actionJugador == '0') return;
+      if(teemode)
+      {
+        if(turno % 3 == 0) enemyMove = 1;  // 1: atacar
+        else enemyMove = 0;                // 0: esquivar
+      }
+      else
+      {
+        if(slimeMode) enemyMove = 1;
+        else
+        {
+          int action = rand()%4;
+          if(action != 0) enemyMove = 1;  // 1: atacar
+          else enemyMove = 0;             // 0: esquivar
+        }
+      }
+      
+      switch(actionJugador)
+        {
+          case 'A':
+          case 'a':
+            if(tempYou.pde < you->pde) tempYou.pde++;
+            if(enemyMove == 0)
+            {
+              printf("Enemigo esquivó tu ataque\n");
+              printf("¡¡CONTRAATAQUE DEL ENEMIGO!!\n");
+              if(teemode)
+              {
+                dmg = tempEne.enemy.atq;
+              }
+              else dmg = tempEne.enemy.atq / 2;
+              printf("%s -%d PV\n", tempYou.nombre, dmg);
+              tempYou.hp -= dmg;
+              if(tempYou.hp <= 0)
+                {
+                  tempYou.hp = 0;
+                  while(true)
+                    {
+                      printf("%15sTurno: %d\n", "",turno);
+                      info(tempYou, tempEne);
+                      printf("Perdiste!! Buen intento\n");
+                      printf("Confirmar(0)");
+                      if(getchar() == '0') return;
+                      limpiarPantalla();
+                    }
+                  return;
+                }
+            }
+            else
+            {
+              dmg = atack(tempYou, tempEne, 1); // indica quienes atacante
+              if(dmg == tempYou.atq)
+                printf("ATACAR!! %s -%d PV\n", tempEne.enemy.nombre, dmg);
+              else if(dmg > tempYou.atq)
+                printf("ATAQUE EFICAZ!! %s -%d PV\n", tempEne.enemy.nombre, dmg);
+              else
+                printf("ATAQUE INEFICAZ!! %s -%d PV\n", tempEne.enemy.nombre, dmg);
+              tempEne.enemy.hp -= dmg;
+              if(tempEne.enemy.hp <= 0)
+              {
+                tempEne.enemy.hp = 0;
+                ene->defeat = true;
+                while(true)
+                  {
+                    printf("%15sTurno: %d\n", "",turno);
+                    info(tempYou, tempEne);
+                    printf("Ganaste la partida!! FELICIDADES!!\n");
+                    if(nivel < 5) printf("+1 Deseos\n");
+                    else if (nivel >= 5 && nivel < 10) printf("+2 Deseos\n");
+                    else if(nivel >= 10 && nivel < 15) printf("+3 Deseos\n");
+                    else if(nivel == 15) printf("+5 Deseos\n");
+                    printf("Confirmar(0)\n");
+                    if(getchar() == '0')
+                    {
+                      if(nivel < 5) *deseos += 1;
+                      else if (nivel >= 5 && nivel < 10) *deseos += 2;
+                      else if(nivel >= 10 && nivel < 15) *deseos += 3;
+                      else if(nivel == 15) *deseos += 5;
+                      return;
+                    }
+                    limpiarPantalla();
+                  }
+              }
+              printf("Luego...\n");
+              dmg = atack(tempYou, tempEne, 2);
+              if(dmg == tempEne.enemy.atq)
+                printf("Enemigo te atacó!! %s -%d PV\n", tempYou.nombre, dmg);
+              else if(dmg > tempEne.enemy.atq)
+                printf("Enemigo te atacó de forma eficaz!! %s -%d PV\n", tempYou.nombre, dmg);
+              else
+                printf("Enemigo te atacó de forma ineficaz!! %s -%d PV\n", tempYou.nombre, dmg);
+              tempYou.hp -= dmg;
+              if(tempYou.hp <= 0)
+              {
+                tempYou.hp = 0;
+                while(true)
+                  {
+                    printf("%15sTurno: %d\n", "",turno);
+                    info(tempYou, tempEne);
+                    printf("Perdiste!! Buen intento\n");
+                    printf("Confirmar(0)");
+                    if(getchar() == '0') return;
+                    limpiarPantalla();
+                  }
+                return;
+              }
+            }
+            break;
+          case 'E':
+          case 'e':
+            if(tempYou.pde > 0)
+            {
+              tempYou.pde--;
+              if(fernanMode)
+              {
+                printf("SIENTE MI FURIA!!\n");
+                printf("%s -5 PV\n", tempEne.enemy.nombre);
+                tempEne.enemy.hp -= 5;
+              }
+              else
+              {
+                printf("ESQUIVAR!!\n");
+                if(enemyMove == 0) 
+                  printf("El enemigo no atacó...\n");
+                else if(enemyMove == 1)
+                {
+                  dmg = tempYou.atq / 2;
+                  printf("Esquivaste el ataque del enemigo!!\n");
+                  printf("CONTRAATAQUE!!\n");
+                  printf("%s -%d PV\n", tempEne.enemy.nombre, dmg);
+                  tempEne.enemy.hp -= dmg;
+                }
+              }
+              if(tempEne.enemy.hp <= 0)
+              {
+                tempEne.enemy.hp = 0;
+                ene->defeat = true;
+                while(true)
+                  {
+                    printf("%15sTurno: %d\n", "",turno);
+                    info(tempYou, tempEne);
+                    printf("Ganaste la partida!! FELICIDADES!!\n");
+                    if(nivel < 5) printf("+1 Deseos\n");
+                    else if (nivel <= 5 && nivel < 10) printf("+2 Deseos\n");
+                    else if(nivel <= 10 && nivel < 15) printf("+3 Deseos\n");
+                    else if(nivel == 15) printf("+5 Deseos\n");
+                    printf("Confirmar(0)\n");
+                    if(getchar() == '0')
+                    {
+                      if(nivel < 5) *deseos += 1;
+                      else if (nivel <= 5 && nivel < 10) *deseos += 2;
+                      else if(nivel <= 10 && nivel < 15) *deseos += 3;
+                      else if(nivel == 15) *deseos += 5;
+                      return;
+                    }
+                    limpiarPantalla();
+                  }
+              }
+            }
+            else
+            {
+              printf("PDE Insuficiente\n");
+              continue;
+            }
+            break;
+          default:
+            continue;
+        }
+      turno++;
+    }
+}
+
+campeon* selectPersonaje(int opcion, List * charac)
+{
+  
+  campeon* current = firstList(charac);
+  campeon* next = nextList(charac);
+  int avance = 1;
+  while(avance < opcion && next != NULL)
+  {
+    current = next;
+    next = nextList(charac);
+    avance++;
+  }
+  return current;
+}
+
+void prepararCombate(account* yo, enemyState *level, int nivel)
+{
+  restore_original_terminal_mode();
+  show_cursor();
+  int opcion;
+  while(true)
+  {
+    limpiarPantalla();
+    printf("Elige un campeón para el combate\n\n");
+    mostrarListaPersonajes(yo->charac);
+    printf("Ingrese su opción(Enter para confirmar): ");
+    if(scanf("%i", &opcion) != 1 || opcion < 0 || opcion > 15)
+    {
+      while(getchar() != '\n');
+      printf("Opción inválida\n");
+    }
+    else if(opcion == 0) 
+    {
+      set_conio_terminal_mode();
+      hide_cursor();
+      return;
+    }
+    else if(opcion >= 1 && opcion <= 15 && selectPersonaje(opcion, yo->charac) != NULL)
+    {
+      while(getchar() != '\n');
+      break;
+    }
+    
+  }
+  set_conio_terminal_mode();
+  hide_cursor();
+  printf("Seleccionaste a %s\n", selectPersonaje(opcion, yo->charac)->nombre);
+  getchar();
+  batalla(selectPersonaje(opcion, yo->charac), level, &yo->deseos, nivel);
 }
 
 //========================================================================
@@ -559,9 +890,19 @@ void menuCombate(account* yo, List* enemies)
         break;
       case 'X':
       case 'x':
-        prepararCombate(yo, nivelActual);
+        prepararCombate(yo, nivelActual, nivel);
         limpiarPantalla();
         break;
+    }
+    if(nivel == 15 && nivelActual->defeat)
+    {
+      limpiarPantalla();
+      printf("         ¡¡FELICIDADES!!\n");
+      printf("Has derrotado a todos los enemigos\n");
+      printf("      ¡¡Gracias por jugar!!\n");
+      nivelActual->defeat = false;
+      getchar();
+      limpiarPantalla();
     }
   }
 }
@@ -587,20 +928,29 @@ void menuSummon(account* yo, HashMap* banners)
             if(yo->deseos > 0)
             {
               yo->deseos -= 1;
-              num = tirarBanner(yo, banners);
+              num = invocar();
               campeon *obtenido = searchMap(banners, &num)->value;
-              printf("Obtuviste: %s\n", obtenido->nombre);
-              if(!isIn(yo->charac, obtenido))
+              if(num != 15)
               {
-                pushBack(yo->charac, obtenido);
+                printf("Obtuviste: %s\n", obtenido->nombre);
+                presioneParaContinuar();
               }
               else
               {
-                printf("Ya tienes este personaje\n");
+                while(true)
+                  {
+                    limpiarPantalla();
+                    printf("Obtuviste campeón LEGENDARIO: %s\n", obtenido->nombre);
+                    printf("Confirmar(0)\n");
+                    opcion = getchar();
+                    if(opcion == '0') break;
+                  }
               }
+              if(!isIn(yo->charac, obtenido)) pushBack(yo->charac, obtenido);
+              else printf("Ya tienes este personaje\n");
             }
             else printf("No tienes deseos suficientes\n");
-            presioneParaContinuar();
+            
             break;
 
           case '2':
@@ -635,7 +985,7 @@ void menuPersonajes(account* yo)
   }
 }
 
-bool menuEliminar()  //Jose Mena  09/06/24
+bool menuEliminar()
 {
   limpiarPantalla();
   char opcion;
@@ -675,11 +1025,12 @@ void mostrarMenu()
 
 
 int main(void) {
-  
+  //=================================
   save_original_terminal_mode();
   srand(time(NULL));
   set_conio_terminal_mode();
   hide_cursor();
+  //=================================
   
   bool eliminar = false;
   HashMap* banners = createMap(22);
@@ -687,39 +1038,7 @@ int main(void) {
   account* yo = (account*)malloc(sizeof(account));
   inicializeBanners(banners);
   inicializeEnemies(enemies);
-    /*
-  while(true)
-    {
-      int input;
-      scanf("%d", &input);
-      if(input == 0) break;
-      int num = tirarBanner(yo, banners);
-      campeon *obtenido = searchMap(banners, &num)->value;
-      printf("Obtuviste: %s\n", obtenido->nombre);
-    }
-*/
-  
-  /*
-  int i = 1;
-  personaje* teemp = searchMap(banners, &i)->value;
-  printf("%s\n", teemp->nombre);
-  printf(" %i\n", teemp->hp);
-  printf(" %i\n", teemp->atq);
-  printf(" %i\n", teemp->pde);
-*/
-  /*
-  enemyState* teeemp = firstList(enemies);
-  while(teeemp != NULL)
-    {
-      printf("%s\n", teeemp->enemy.nombre);
-      printf("%i\n", teeemp->enemy.hp);
-      printf("%i\n", teeemp->enemy.atq);
-      printf("%i\n", teeemp->enemy.tipo);
-      printf("\n");
-      teeemp = nextList(enemies);
-    }
-  */
-  //Jean Billiard  06/06/24
+
   puts("         --------------------------------");
   puts("         |   Bienvenido a Idle battle   |");
   puts("         |  Apreta ENTER para Comenzar  |");
@@ -737,7 +1056,6 @@ int main(void) {
     {
       case '1':
         menuCombate(yo, enemies);
-        
         break;
       case '2':
         menuSummon(yo, banners);
@@ -752,9 +1070,7 @@ int main(void) {
         eliminar = menuEliminar();
         break;
     }
-    //while(getchar() != '\n');
     limpiarPantalla();
-    //presioneParaContinuar();
   }while(!eliminar);
   return 0;
 }
