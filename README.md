@@ -1,1 +1,1 @@
-**Idle Battle**
+# Idle Battle
