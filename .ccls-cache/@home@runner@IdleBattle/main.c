@@ -9,6 +9,9 @@
 #include "list.h"
 #include "hashMap.h"
 
+
+#define MAX_LINE_LENGTH 1024
+#define MAX_FIELDS 300
 //======================Configuración del terminal========================
 
 struct termios original;
@@ -42,6 +45,52 @@ void show_cursor()
   fflush(stdout);
 }
 
+char **leer_linea_csv(FILE *archivo, char separador) {
+  static char linea[MAX_LINE_LENGTH];
+  static char *campos[MAX_FIELDS];
+  char *ptr, *start;
+  int idx = 0;
+
+  if (fgets(linea, MAX_LINE_LENGTH, archivo) == NULL) {
+    return NULL; // No hay más líneas para leer
+  }
+
+  // Eliminar salto de linea
+  linea[strcspn(linea, "\n")] = '\0';
+
+  ptr = start = linea;
+  while (*ptr) {
+    if (idx >= MAX_FIELDS - 1)
+      break;
+
+    if (*ptr == '\"') { // Inicio de un campo entrecomillado
+      start = ++ptr;    // Saltar la comilla inicial
+      while (*ptr && !(*ptr == '\"' && *(ptr + 1) == separador))
+        ptr++;
+    } else { // Campo sin comillas
+      start = ptr;
+      while (*ptr && *ptr != separador)
+        ptr++;
+    }
+
+    if (*ptr) {
+      *ptr = '\0'; // Reemplazar comilla final o separador por terminación
+      ptr++;
+      if (*ptr == separador)
+        ptr++;
+    }
+
+    // Quitar comilla final si existe
+    if (*(ptr - 2) == '\"') {
+      *(ptr - 2) = '\0';
+    }
+
+    campos[idx++] = start;
+  }
+
+  campos[idx] = NULL; // Marcar el final del array
+  return campos;
+}
 //========================================================================
 
 
@@ -106,287 +155,56 @@ int is_equal_int(void *key1, void *key2) {           //comparar int
 //===========================Inicializaciones=============================
 void inicializeBanners(HashMap* banners)     //inicializa los banners
 {
-  //========================inicializar cada personaje====================
-  campeon* charizard = (campeon*)malloc(sizeof(campeon));
-  strcpy(charizard->nombre, "Charizard");
-  charizard->code = 1;
-  charizard->hp = 60;
-  charizard->atq = 3;
-  charizard->pde = 2;
-  charizard->tipo = 1;
+  FILE *bannersFile = fopen("banners.csv", "r"); //Abrir el archivo banners.csv
+  if(bannersFile == NULL)
+  {
+    printf("error\n");
+    return;
+  }
+  char **campos;
+  campos = leer_linea_csv(bannersFile, ',');  //saltar la primera linea
 
-  campeon* goku = (campeon*)malloc(sizeof(campeon));
-  strcpy(goku->nombre, "Goku");
-  goku->code = 2;
-  goku->hp = 50;
-  goku->atq = 4;
-  goku->pde = 2;
-  goku->tipo = 1;
+  //leer cada linea del archivo e insertando en el mapa
+  while((campos = leer_linea_csv(bannersFile, ',')) != NULL)
+    {
+      campeon* candidato = (campeon*) malloc(sizeof(campeon));
+      strcpy(candidato->nombre, campos[0]);
+      candidato->code = atoi(campos[1]);
+      candidato->hp = atoi(campos[2]);
+      candidato->atq = atoi(campos[3]);
+      candidato->pde = atoi(campos[4]);
+      candidato->tipo = atoi(campos[5]);
 
-  campeon* hutao = (campeon*)malloc(sizeof(campeon));
-  strcpy(hutao->nombre, "Hutao");
-  hutao->code = 3;
-  hutao->hp = 30;
-  hutao->atq = 6;
-  hutao->pde = 1;
-  hutao->tipo = 1;
-
-  campeon* escanor = (campeon*)malloc(sizeof(campeon));
-  strcpy(escanor->nombre, "Escanor");
-  escanor->code = 4;
-  escanor->hp = 80;
-  escanor->atq = 4;
-  escanor->pde = 0;
-  escanor->tipo = 1;
-
-  campeon* sieteDeMarzo = (campeon*)malloc(sizeof(campeon));
-  strcpy(sieteDeMarzo->nombre, "Siete de marzo");
-  sieteDeMarzo->code = 5;
-  sieteDeMarzo->hp = 30;
-  sieteDeMarzo->atq = 3;
-  sieteDeMarzo->pde = 5;
-  sieteDeMarzo->tipo = 2;
-
-  campeon* ellie = (campeon*)malloc(sizeof(campeon));
-  strcpy(ellie->nombre, "Ellie");
-  ellie->code = 6;
-  ellie->hp = 30;
-  ellie->atq = 3;
-  ellie->pde = 4;
-  ellie->tipo = 3;
-
-  campeon* leonKennedy = (campeon*)malloc(sizeof(campeon));
-  strcpy(leonKennedy->nombre, "Leon Kennedy");
-  leonKennedy->code = 7;
-  leonKennedy->hp = 50;
-  leonKennedy->atq = 3;
-  leonKennedy->pde = 2;
-  leonKennedy->tipo = 2;
-
-  campeon* karma = (campeon*)malloc(sizeof(campeon));
-  strcpy(karma->nombre, "Karma");
-  karma->code = 8;
-  karma->hp = 40;
-  karma->atq = 3;
-  karma->pde = 2;
-  karma->tipo = 3;
-
-  campeon* hatsuneMiku = (campeon*)malloc(sizeof(campeon));
-  strcpy(hatsuneMiku->nombre, "Hatsune Miku");
-  hatsuneMiku->code = 9;
-  hatsuneMiku->hp = 70;
-  hatsuneMiku->atq = 2;
-  hatsuneMiku->pde = 5;
-  hatsuneMiku->tipo = 2;
-
-  campeon* jake = (campeon*)malloc(sizeof(campeon));
-  strcpy(jake->nombre, "Jake");
-  jake->code = 10;
-  jake->hp = 80;
-  jake->atq = 4;
-  jake->pde = 0;
-  jake->tipo = 3;
-
-  campeon* bobEsponja = (campeon*)malloc(sizeof(campeon));
-  strcpy(bobEsponja->nombre, "Bob Esponja");
-  bobEsponja->code = 11;
-  bobEsponja->hp = 30;
-  bobEsponja->atq = 3;
-  bobEsponja->pde = 6;
-  bobEsponja->tipo = 2;
-
-  campeon* arale = (campeon*)malloc(sizeof(campeon));
-  strcpy(arale->nombre, "Arale");
-  arale->code = 12;
-  arale->hp = 5;
-  arale->atq = 20;
-  arale->pde = 0;
-  arale->tipo = 1;
-
-  campeon* fernanfloo = (campeon*)malloc(sizeof(campeon));
-  strcpy(fernanfloo->nombre, "Fernanfloo");
-  fernanfloo->code = 13;
-  fernanfloo->hp = 1;
-  fernanfloo->atq = 0;
-  fernanfloo->pde = 5;
-  fernanfloo->tipo = 1;
-
-  campeon* deku = (campeon*)malloc(sizeof(campeon));
-  strcpy(deku->nombre, "Deku");
-  deku->code = 14;
-  deku->hp = 40;
-  deku->atq = 4;
-  deku->pde = 4;
-  deku->tipo = 1;
-
-  campeon* dios = (campeon*)malloc(sizeof(campeon));
-  strcpy(dios->nombre, "Dios");
-  dios->code = 15;
-  dios->hp = 999;
-  dios->atq = 999;
-  dios->pde = 0;
-  dios->tipo = 1;
-  //======================================================================
-
-  //=================insertar cada personaje en el mapa===================
-  insertMap(banners, &charizard->code, charizard);
-  insertMap(banners, &goku->code, goku);
-  insertMap(banners, &hutao->code, hutao);
-  insertMap(banners, &escanor->code, escanor);
-  insertMap(banners, &sieteDeMarzo->code, sieteDeMarzo);
-  insertMap(banners, &ellie->code, ellie);
-  insertMap(banners, &leonKennedy->code, leonKennedy);
-  insertMap(banners, &karma->code, karma);
-  insertMap(banners, &hatsuneMiku->code, hatsuneMiku);
-  insertMap(banners, &jake->code, jake);
-  insertMap(banners, &bobEsponja->code, bobEsponja);
-  insertMap(banners, &arale->code, arale);
-  insertMap(banners, &fernanfloo->code, fernanfloo);
-  insertMap(banners, &deku->code, deku);
-  insertMap(banners, &dios->code, dios);
+      insertMap(banners, &candidato->code, candidato);
+    }
+  fclose(bannersFile);
   //======================================================================
 }
-//Lei  08/06/24
+
 void inicializeEnemies(List* enemies)      //inicializar los enemigos
 {
-  //========================inicializar cada enemigo======================
-  enemyState* slime = (enemyState*)malloc(sizeof(enemyState));
-  slime->defeat = false;
-  slime->type = 1;
-  strcpy(slime->enemy.nombre, "Slime");
-  slime->enemy.hp = 5;
-  slime->enemy.atq = 10;
-  slime->enemy.tipo = 2;
+  FILE *enemiesFile = fopen("enemies.csv", "r"); //Abrir el archivo enemies.csv
+  if(enemiesFile == NULL)
+  {
+    printf("error\n");
+    return;
+  }
+  char **campos;
+  campos = leer_linea_csv(enemiesFile, ',');  //saltar la primera linea
 
-  enemyState* zombie = (enemyState*)malloc(sizeof(enemyState));
-  zombie->defeat = false;
-  zombie->type = 1;
-  strcpy(zombie->enemy.nombre, "Zombie");
-  zombie->enemy.hp = 11;
-  zombie->enemy.atq = 15;
-  zombie->enemy.tipo = 3;
-
-  enemyState* sdv = (enemyState*)malloc(sizeof(enemyState));
-  sdv->defeat = false;
-  sdv->type = 1;
-  strcpy(sdv->enemy.nombre, "Saqueador del vacio");
-  sdv->enemy.hp = 23;
-  sdv->enemy.atq = 15;
-  sdv->enemy.tipo = 1;
-
-  enemyState* creeper = (enemyState*)malloc(sizeof(enemyState));
-  creeper->defeat = false;
-  creeper->type = 1;
-  strcpy(creeper->enemy.nombre, "Creeper");
-  creeper->enemy.hp = 12;
-  creeper->enemy.atq = 30;
-  creeper->enemy.tipo = 1;
-
-  enemyState* teemo = (enemyState*)malloc(sizeof(enemyState));
-  teemo->defeat = false;
-  teemo->type = 2;
-  strcpy(teemo->enemy.nombre, "Teemo");
-  teemo->enemy.hp = 25;
-  teemo->enemy.atq = 10;
-  teemo->enemy.tipo = 3;
-
-  enemyState* saibaMan = (enemyState*)malloc(sizeof(enemyState));
-  saibaMan->defeat = false;
-  saibaMan->type = 1;
-  strcpy(saibaMan->enemy.nombre, "Saibaman");
-  saibaMan->enemy.hp = 30;
-  saibaMan->enemy.atq = 10;
-  saibaMan->enemy.tipo = 3;
-
-  enemyState* limonagrio = (enemyState*)malloc(sizeof(enemyState));
-  limonagrio->defeat = false;
-  limonagrio->type = 1;
-  strcpy(limonagrio->enemy.nombre, "Limonagrio");
-  limonagrio->enemy.hp = 30;
-  limonagrio->enemy.atq = 10;
-  limonagrio->enemy.tipo = 2;
-
-  enemyState* patricio = (enemyState*)malloc(sizeof(enemyState));
-  patricio->defeat = false;
-  patricio->type = 1;
-  strcpy(patricio->enemy.nombre, "Patricio");
-  patricio->enemy.hp = 50;
-  patricio->enemy.atq = 5;
-  patricio->enemy.tipo = 2;
-
-  enemyState* barbaro = (enemyState*)malloc(sizeof(enemyState));
-  barbaro->defeat = false;
-  barbaro->type = 1;
-  strcpy(barbaro->enemy.nombre, "Barbaro");
-  barbaro->enemy.hp = 20;
-  barbaro->enemy.atq = 20;
-  barbaro->enemy.tipo = 3;
-
-  enemyState* juanGuarnizo = (enemyState*)malloc(sizeof(enemyState));
-  juanGuarnizo->defeat = false;
-  juanGuarnizo->type = 2;
-  strcpy(juanGuarnizo->enemy.nombre, "Juanguarnizo");
-  juanGuarnizo->enemy.hp = 30;
-  juanGuarnizo->enemy.atq = 15;
-  juanGuarnizo->enemy.tipo = 1;
-
-  enemyState* rakkun = (enemyState*)malloc(sizeof(enemyState));
-  rakkun->defeat = false;
-  rakkun->type = 1;
-  strcpy(rakkun->enemy.nombre, "Rakkun");
-  rakkun->enemy.hp = 40;
-  rakkun->enemy.atq = 20;
-  rakkun->enemy.tipo = 3;
-
-  enemyState* kratos = (enemyState*)malloc(sizeof(enemyState));
-  kratos->defeat = false;
-  kratos->type = 1;
-  strcpy(kratos->enemy.nombre, "Kratos");
-  kratos->enemy.hp = 30;
-  kratos->enemy.atq = 10;
-  kratos->enemy.tipo = 1;
-
-  enemyState* dotorre = (enemyState*)malloc(sizeof(enemyState));
-  dotorre->defeat = false;
-  dotorre->type = 1;
-  strcpy(dotorre->enemy.nombre, "Dotorre");
-  dotorre->enemy.hp = 30;
-  dotorre->enemy.atq = 10;
-  dotorre->enemy.tipo = 2;
-
-  enemyState* sans = (enemyState*)malloc(sizeof(enemyState));
-  sans->defeat = false;
-  sans->type = 1;
-  strcpy(sans->enemy.nombre, "Sans");
-  sans->enemy.hp = 10;
-  sans->enemy.atq = 50;
-  sans->enemy.tipo = 1;
-
-  enemyState* sukuna = (enemyState*)malloc(sizeof(enemyState));
-  sukuna->defeat = false;
-  sukuna->type = 3;
-  strcpy(sukuna->enemy.nombre, "Sukuna");
-  sukuna->enemy.hp = 50;
-  sukuna->enemy.atq = 40;
-  sukuna->enemy.tipo = 1;
-  //======================================================================
-  
-  //=================insertar cada enemigo en la lista====================
-  pushBack(enemies, slime);
-  pushBack(enemies, zombie);
-  pushBack(enemies, sdv);
-  pushBack(enemies, creeper);
-  pushBack(enemies, teemo);
-  pushBack(enemies, saibaMan);
-  pushBack(enemies, limonagrio);
-  pushBack(enemies, patricio);
-  pushBack(enemies, barbaro);
-  pushBack(enemies, juanGuarnizo);
-  pushBack(enemies, rakkun);
-  pushBack(enemies, kratos);
-  pushBack(enemies, dotorre);
-  pushBack(enemies, sans);
-  pushBack(enemies, sukuna);
+  //leer cada linea del archivo e insertando en el mapa
+  while((campos = leer_linea_csv(enemiesFile, ',')) != NULL)
+    {
+      enemyState* candidato = (enemyState*) malloc(sizeof(enemyState));
+      strcpy(candidato->enemy.nombre, campos[0]);
+      candidato->enemy.hp = atoi(campos[1]);
+      candidato->enemy.atq = atoi(campos[2]);
+      candidato->enemy.tipo = atoi(campos[3]);
+      candidato->defeat = 0;
+      candidato->type = atoi(campos[4]);
+      pushBack(enemies, candidato);
+    }
+  fclose(enemiesFile);
   //======================================================================
 }
 
@@ -422,6 +240,8 @@ void mostrarNivel(enemyState* level)
   
   printf("-----------------------------------\n");
   printf("| %-*s|\n", 32, level->enemy.nombre);
+  if(level->type == 2)printf("| %-*s|\n", 32, "(Elite)");
+  else if(level->type == 3)printf("| %-*s|\n", 32, "(Jefe)");
   printf("-----------------------------------\n");
   printf("| Tipo     |");
   if(level->enemy.tipo == 1)
@@ -451,7 +271,7 @@ void selectEnemy(int nivel, enemyState* level)
 
 void mostrarListaPersonajes(List* charac) //Jean Billiard  08/06/24
 {
-  puts("Personajes                 Salir(0)");
+  puts("Campeones                  Salir(0)");
   puts("-----------------------------------");
   int numero = 0;
   for (campeon* current = firstList(charac); current != NULL; current = nextList(charac))
@@ -761,15 +581,15 @@ void batalla(campeon* you, enemyState* ene, int *deseos, int nivel)
                     info(tempYou, tempEne);
                     printf("Ganaste la partida!! FELICIDADES!!\n");
                     if(nivel < 5) printf("+1 Deseos\n");
-                    else if (nivel <= 5 && nivel < 10) printf("+2 Deseos\n");
-                    else if(nivel <= 10 && nivel < 15) printf("+3 Deseos\n");
+                    else if (nivel >= 5 && nivel < 10) printf("+2 Deseos\n");
+                    else if(nivel >= 10 && nivel < 15) printf("+3 Deseos\n");
                     else if(nivel == 15) printf("+5 Deseos\n");
                     printf("Confirmar(0)\n");
                     if(getchar() == '0')
                     {
                       if(nivel < 5) *deseos += 1;
-                      else if (nivel <= 5 && nivel < 10) *deseos += 2;
-                      else if(nivel <= 10 && nivel < 15) *deseos += 3;
+                      else if (nivel >= 5 && nivel < 10) *deseos += 2;
+                      else if(nivel >= 10 && nivel < 15) *deseos += 3;
                       else if(nivel == 15) *deseos += 5;
                       return;
                     }
@@ -933,7 +753,6 @@ void menuSummon(account* yo, HashMap* banners)
               if(num != 15)
               {
                 printf("Obtuviste: %s\n", obtenido->nombre);
-                presioneParaContinuar();
               }
               else
               {
@@ -948,9 +767,13 @@ void menuSummon(account* yo, HashMap* banners)
               }
               if(!isIn(yo->charac, obtenido)) pushBack(yo->charac, obtenido);
               else printf("Ya tienes este personaje\n");
+              presioneParaContinuar();
             }
-            else printf("No tienes deseos suficientes\n");
-            
+            else
+            {
+              printf("No tienes deseos suficientes\n");
+              getchar();
+            }
             break;
 
           case '2':
@@ -1017,9 +840,9 @@ void mostrarMenu()
   //Jean Billiard  06/06/24
   limpiarPantalla();
   puts("                    IDLE BATTLE");
-  puts("                    1. Combate");
+  puts("                    1. Aventura");
   puts("                    2. Summon");
-  puts("                    3. Personajes");
+  puts("                    3. Campeones");
   puts("                    4. Borrar Mi cuenta");
 }
 
