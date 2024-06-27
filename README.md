@@ -22,3 +22,12 @@ https://github.com/JeanBilliardVega/IdleBattleRepositoryGitHub
 * Opción para guardar el progreso del juego
 * Galería de campeones
 ## Ejemplo de uso
+**Menu de bienvenida**
+ 
+Al comienzo del programa, El sistema dará la bienvenida al jugador, apreta cualquier tecla para comenzar
+```
+         --------------------------------
+         |   Bienvenido a Idle battle   |
+         |  Apreta ENTER para Comenzar  |
+         --------------------------------
+```
