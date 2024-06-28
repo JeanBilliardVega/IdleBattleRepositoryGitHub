@@ -299,11 +299,11 @@ El jugador accederá al menú de combate cuando este aprete la tecla 1 en el men
   cuenta y regresaremos al menú principal.
 
 ## Tip del juego
-Cada campeón tiene su respectivo **tipo de elemento**, selecciona campeon adecuado para vencer a los enemigos. Relación de los elementos:
+Cada campeón tiene su respectivo **tipo de elemento**, selecciona campeón adecuado para vencer a los enemigos. Relación de los elementos:
 ````
-Fuego -> Planta
-Planta -> Agua
-Agua -> Fuego
+Fuego -> Planta  (Eficaz)
+Planta -> Agua  (Eficaz)
+Agua -> Fuego  (Eficaz)
 ````
 Suertes jugador!! Que tenga buena experiencia!!
 
