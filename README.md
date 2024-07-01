@@ -307,3 +307,95 @@ Agua -> Fuego  (Eficaz)
 ````
 Suertes jugador!! Que tenga buena experiencia!!
 
+## Contribuciones
+
+### TDAs
+
+**Selección:** Jean Billiard, Jose Mena, Zhiheng
+**Implementación:** Zhiheng
+
+### Estructuras
+
+**Definición de las estructuras:** Jean Billiard, Zhiheng
+
+### Menús
+
+**Implementación del main(Menú principal):** Jean Billiard
+
+**1. Menú combate:**
+
+**Lista de enemigos:** Jean Billiard
+
+**Selección de campeones:** Jose Mena
+
+**Escenario de combate:** Zhiheng
+
+**2. Menú summon:**
+
+**Implementación del Menú:** Jean Billiard, Jose Mena, Zhiheng
+
+**3. Menú Campeones:**
+
+**Implementación del Menú:** Jean Billiard
+
+**4. Menú Eliminar mi cuenta:**
+
+**Implementación del Menú:** Jose Mena
+
+### Funciones
+
+**1. Menú Combate:**
+
+**selectEnemy:** Jean Billiard
+
+**mostrarNivel:** Jean Billiard
+
+**prepararCombate:** Jose Mena
+
+**batalla:** Zhiheng
+
+**2. Menú Summon:**
+
+**invocar:** Zhiheng
+
+**gachaComun:** Zhiheng
+
+**mostrarInfoProbabilidades:** Jose Mena
+
+**Implementación:** Jean Billiard
+
+**3. Menú Campeones:**
+
+**mostrarListaCampeones:** Jean Billiard
+
+**mostrarCampeon:** Jean Billiard
+
+**Implementación:** Jean Billiard
+
+**4. Menú Eliminar mi cuenta:**
+
+**Implementación:** Jose Mena
+
+**5. Inicializaciones:**
+
+**inicializeBanners:** Zhiheng
+
+**inicializeEnemies:** Zhiheng
+
+**inicializeYo:** Zhiheng
+
+**6. Configuración del terminal:** Apoyo del profesor Ignacio Araya
+
+### Otros
+
+**Diseño interfaz del programa:** Zhiheng
+
+**Diseño de los enemigos & campeones:**
+
+**Nombre:** Referenciado por varias obras o youtubers(Minecraft, Honkai: Star Rail, League of legends, Dragon Ball, Hora de aventura, Clash of clans, Juanguarnizo, Rakkun, God of wars, Genshin, Undertale, Jujutsu Kaisen, Pokemon, Nanatsu no taizai, The last of us, Resident Evil, Hatsune Miku, Bob esponja, Fernanfloo, Boku no hero academia)
+
+**Estadísticas:** Jean Billiard, Zhiheng
+
+**Diseño mecanismo de combate:** Jean Billiard, Zhiheng
+
+**Testeo y optimización del código:** Jean Billiard, Jose Mena, Zhiheng
